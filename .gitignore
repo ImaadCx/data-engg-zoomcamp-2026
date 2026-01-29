@@ -208,3 +208,6 @@ __marimo__/
 
 #parquets
 *.parquet
+
+# Keys directory 
+keys/
