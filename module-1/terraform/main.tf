@@ -10,7 +10,7 @@ terraform {
 
 # ======PROVIDER CONFIG======
 provider "google" {
-  project = "terraform-dezoom-2026"
+  project = var.Project
   region  = "us-central1"
 
 }
@@ -18,8 +18,9 @@ provider "google" {
 resource "google_storage_bucket" "terra_first_bucket" {
 
   # This name must be globally unqiue 
-  name          = "terra-first-bucket-dezoom-2616"
-  location      = "US"
+  name          = var.gcs_bucket_name
+  location      = var.gcs_location
+  storage_class = var.gcs_storage_class
   force_destroy = true
 
   lifecycle_rule {
@@ -39,4 +40,10 @@ resource "google_storage_bucket" "terra_first_bucket" {
     }
   }
 }
- 
+
+resource "google_bigquery_dataset" "tera_bigquery_dataset" {
+  dataset_id = var.big_query_dataset
+  description = "This the the first BigQuery dataset created using Terraform"
+  location   = "US"
+  
+}
