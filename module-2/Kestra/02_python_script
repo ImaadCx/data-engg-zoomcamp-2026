@@ -1,0 +1,28 @@
+id: python_script
+namespace: zoomcamp
+
+description: This flow will install the pip package in the Docker Container. And then use kestra's py lib to generate outputs.Outputs is the number of downloads of Kestra docker image.
+
+tasks:
+  - id: collect_data
+    type: io.kestra.plugin.scripts.python.Script
+    taskRunner: 
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+    containerImage: python:slim
+    dependencies:
+      - requests
+      - kestra
+    script: |
+      from kestra import Kestra as K
+      import requests
+      def get_docker_image_download(image_name:str = "kestra/kestra"):
+        url = f"https://hub.docker.com/v2/repositories/{image_name}/"
+        response = requests.get(url)
+        data = response.json()
+        downloads = data.get('pull_count','Not_available')
+        return downloads
+      
+      downloads = get_docker_image_download()
+      outputs = {
+      'downloads': downloads}
+      K.outputs(outputs)
