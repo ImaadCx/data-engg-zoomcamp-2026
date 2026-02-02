@@ -2,9 +2,9 @@
 
 ## Assignment
 
-## Requirement
+## Requiremnt
 
-In this module, the workflows have processed NYC taxi data for the years 2019 and 2020. The goal of this assignment is to extend the existing Kestra pipelines to include data for 2021.
+In this module, the workflows have processed NYC taxi data for the years 2019 and 2020. The goal of this assignment is to extend the existig Kestra pipelines to include data for 2021.
 
 **Dataset**
 - Monthly NYC TLC taxi CSV files (green & yellow)
@@ -18,7 +18,7 @@ In this module, the workflows have processed NYC taxi data for the years 2019 an
 **Approach**
 
 Use Kestra to re-run historical data for 2021, either by:
-1. Backfilling the scheduled GCP flow for the relevant date range, or  
+1. Backfilling the scheduled GCP flow for the relvant date range, or  
 2. Manually running the flow per month.
 
 ## Solutions
@@ -26,8 +26,7 @@ Use Kestra to re-run historical data for 2021, either by:
 For this assignment, I chose **Approach 1: Backfilling the scheduled flow**.
 
 I reused the existing scheduled workflow **`09_gcp_taxi_scheduled.yaml`**, which processes monthly taxi data based on the trigger execution date.  
-Instead of modifying the pipeline or creating new flows, I used Kestra’s **Backfill** feature to reprocess historical data for 2021.
-
+Instead of modifying the pipeline or creating new flows, I used Kestra's **Backfill** feature to reprocess historical data for 2021.
 
 **1. Scheduled flow and triggers**
 
@@ -36,8 +35,6 @@ The scheduled flow defines two triggers:
 - One for **yellow taxi**
 
 These triggers normally run monthly, but they can also be used as the basis for historical backfills.
-
-![Kestra scheduled triggers](../../images/02_backfill_triggers.png)
 
 **2. Backfill configuration**
 
@@ -48,9 +45,7 @@ Backfill parameters:
 - **End**: `2021-08-01`
 - **Taxi type**: `green` (repeated for `yellow`)
 
-This configuration creates one execution per month and reuses the same pipeline logic.
-
-![Kestra backfill configuration](../../images/02_backfill_config.png)
+This configuration creates one executio per month and reuses the same pipeline logic.
 
 **3. BigQuery results**
 
@@ -59,14 +54,10 @@ After the backfill completed, new monthly tables for 2021 were created in BigQue
 For each month:
 - An **external table** (`*_ext`) points directly to the CSV file in GCS
 - A **merged table** stores the deduplicated results
-![BigQuery tables for 2021](../../images/02_bigquery_2021_tables.png)
 
 **4. Files in Google Cloud Storage**
 
 All corresponding CSV files for 2021 were uploaded to the GCS bucket automatically by the pipeline.
-
-![GCS bucket with 2021 CSV files](../../images/02_gcs_2021_csv_files.png)
-
 
 **Summary**
 
@@ -94,13 +85,10 @@ This was obtained by running the flow **`08_gcp_taxi.yaml`** with the following 
 - year = `2020`
 - month = `12`
 
-After the execution finished, I checked the Metrics tab of the run. The upload_to_gcs task reports the size of the uncompressed CSV file in bytes: 134,481,400 bytes
-![Yellow taxi 2020-12 CSV file size](../../images/02_q1_yellow_2020_12_file_size.png)
-
+After the execution finished, I checked the Metrics tab of the run. The upload_to_gcs task reports the size of the uncompressed CSV file in bytes: 134,481,400 bytes.
 
 Converting bytes to MiB:
 134,481,400 ÷ (1024 × 1024) ≈ 128.3 MiB
-
 
 2) What is the rendered value of the variable `file` when the inputs `taxi` is set to `green`, `year` is set to `2020`, and `month` is set to `04` during execution?
 - `{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv` 
@@ -144,7 +132,7 @@ FROM (
   SELECT * FROM `zoomcamp.yellow_tripdata_2020_06_ext`
   UNION ALL
   SELECT * FROM `zoomcamp.yellow_tripdata_2020_07_ext`
-  UNION ALL
+  UNION AL
   SELECT * FROM `zoomcamp.yellow_tripdata_2020_08_ext`
   UNION ALL
   SELECT * FROM `zoomcamp.yellow_tripdata_2020_09_ext`
@@ -157,9 +145,9 @@ FROM (
 );
 ```
 
-4) How many rows are there for the `Green` Taxi data for all CSV files in the year 2020?
+4) How many rows are therfor the `Green` Taxi data for all CSV files in the year 2020?
 - 5,327,301
-- 936,199
+- 936
 - 1,734,051 ✅
 - 1,342,034
 
@@ -199,7 +187,7 @@ The row counts in Questions 3 and 4 are calculated from **external tables**, not
 
 Each external table corresponds to a single monthly CSV file in GCS (e.g. `yellow_tripdata_2020_01_ext`). Since BigQuery does not support wildcard queries across multiple external tables, the total row count for a year is computed by explicitly combining all monthly tables using `UNION ALL`.
 
-This approach ensures the counts reflect the raw CSV data exactly, rather than the deduplicated records stored in the final partitioned tables.
+This approach ensures the couts reflect the raw CSV data exactly, rather than the deduplicated records stored in the final partitioned tables.
 
 5) How many rows are there for the `Yellow` Taxi data for the March 2021 CSV file?
 - 1,428,092
@@ -222,7 +210,7 @@ FROM `zoomcamp.yellow_tripdata_2021_03_ext`;
 **Explanation**
 
 Kestra schedule triggers run in UTC by default.
-To align executions with New York local time, the timezone must be explicitly configured.
+To align executios with New York local time, the timezone must be explicitly configured.
 
 Using the IANA timezone `America/New_York` ensures the schedule correctly handles daylight saving time transitions. Fixed offsets such as `EST` or `UTC-5` do not account for DST and may result in incorrect execution times.
 
